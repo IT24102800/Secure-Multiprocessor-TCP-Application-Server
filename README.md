@@ -3,7 +3,6 @@
 ![C](https://img.shields.io/badge/Language-C-blue.svg)
 ![Python](https://img.shields.io/badge/Language-Python%203-yellow.svg)
 ![Platform](https://img.shields.io/badge/Platform-Linux-lightgrey.svg)
-![License](https://img.shields.io/badge/License-MIT-green.svg)
 
 ## 📌 Overview
 This project was developed for the **Network Programming**. 
