@@ -1,0 +1,15 @@
+CC = gcc
+CFLAGS = -Wall
+TARGET = server_2800
+SOURCE = server_2800.c
+
+all: $(TARGET)
+
+$(TARGET): $(SOURCE)
+	$(CC) $(CFLAGS) -o $(TARGET) $(SOURCE)
+
+clean:
+	rm -f $(TARGET)
+
+run: $(TARGET)
+	sudo ./$(TARGET)
