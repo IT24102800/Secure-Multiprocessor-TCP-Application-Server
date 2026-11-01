@@ -1,94 +1,139 @@
-# Secure-Multiprocessor-TCP-Application-Server
-A secure, concurrent client-server application built from scratch as part of the Network Programming module.  This project implements a custom TCP protocol with explicit framing, multiprocessing for concurrency, and robust security features including salted hashing, session tokens, and abuse protection.
+# Secure Multiprocessor TCP Application Server
 
-📖 Overview
-This project is a fully functional, secure Client-Server application built from scratch. It implements a custom TCP protocol, multiprocessing for concurrency, and robust security features including salted password hashing, session tokens, and brute-force protection.
+![C](https://img.shields.io/badge/Language-C-blue.svg)
+![Python](https://img.shields.io/badge/Language-Python%203-yellow.svg)
+![Platform](https://img.shields.io/badge/Platform-Linux-lightgrey.svg)
+![License](https://img.shields.io/badge/License-MIT-green.svg)
 
-The system consists of a C-based server (handling low-level socket operations and process forking) and a Python-based client (providing a user-friendly CLI interface).
+## 📌 Overview
+This project was developed for the **Network Programming**. 
 
-✨ Key Features
-🖧 Network & Protocol
-Custom TCP Protocol: Implements explicit framing using LEN:<n> headers to handle partial recv() calls and multiple messages in a single buffer.
+It is a fully functional, secure client-server application built from scratch. The system utilizes a custom TCP framing protocol, multiprocessing for concurrency, and robust security features including salted hashing, session tokens, and rate limiting.
 
-Multiprocessing: Uses fork() to spawn a new child process for every client connection, allowing concurrent handling of multiple clients.
+- **Server:** Written in C (`server_2800.c`)
+- **Client:** Written in Python 3 (`client_2800.py`)
+- **Registration No:** IT24102800
+- **Server ID (SID):** 4102
+- **Port:** 50800
 
-Zombie Prevention: Implements proper SIGCHLD handling with waitpid() to ensure clean child process termination and prevent zombie processes.
+---
 
-Payload Validation: Rejects oversized payloads (>4096 bytes) and invalid length headers.
+## ✨ Key Features
 
-🔒 Security & Authentication
-Salted Hashing: Passwords are never stored in plaintext. Uses a custom salted hashing algorithm (djb2 variant) for secure storage.
+### 1. Custom TCP Protocol (Framing)
+- Implements explicit framing using `LEN:<n>\n<payload>` headers.
+- Handles partial `recv()` calls and multiple messages in a single buffer.
+- Rejects invalid length headers and oversized payloads (> 4096 bytes).
 
-Session Management: Issues unique session tokens upon successful login. Tokens expire after 5 minutes of inactivity.
+### 2. Multiprocessing & Concurrency
+- Uses `fork()` to create a separate child process for every connected client.
+- Parent process continues to accept new connections (listen backlog of 10).
+- Proper `SIGCHLD` handling using `waitpid()` to prevent zombie processes.
 
-Protected Commands: Commands like WHOAMI and LOGOUT require a valid session token.
+### 3. Authentication & Security
+- **Salted Hashing:** Passwords are never stored in plaintext; a custom djb2 variant with salt is used.
+- **Session Tokens:** Issues unique tokens upon login which expire after 5 minutes of inactivity.
+- **Protected Commands:** Commands like `WHOAMI` and `LOGOUT` require a valid token.
+- **Abuse Protection:** 
+  - Rate limiting (5 requests/second per IP).
+  - Brute-force lockout (3 failed attempts = 60-second lockout).
+  - Strict username validation (3-20 chars, alphanumeric + underscores).
 
-Abuse Protection:
+### 4. Persistent Audit Logging
+- All client activities are logged to `server_IT24102800.log`.
+- Logs include: Timestamp, Client IP:Port, Child PID, Username, Command, and Result.
 
-Rate Limiting: Restricts clients to 5 requests per second per IP.
+---
 
-Brute-Force Lockout: Locks accounts for 60 seconds after 3 consecutive failed login attempts.
+## 📂 Project Structure
 
-Input Validation: Enforces strict username rules (3-20 alphanumeric characters and underscores).
+```text
+├── server_2800.c           # Main C server implementation
+├── client_2800.py          # Python CLI client
+├── Makefile_2800           # Build automation
+├── server_IT24102800.log   # Audit log (generated at runtime)
+└── README.md               # Project documentation
+```
 
-📝 Audit Logging
-Maintains a persistent audit log (server_IT24102800.log) recording all activities with timestamps, client IP:Port, Child PID, Username, Command, and Result.
+---
 
-🛠️ Technology Stack
-Server: C (Compiled with gcc)
+## 🚀 Getting Started
 
-Client: Python 3
+### Prerequisites
+- Linux environment (Kali Linux recommended)
+- `gcc` compiler
+- `python3`
+- `sudo` privileges (required for binding to specific ports and creating directories in `/srv/`)
 
-Environment: Linux (Kali/Ubuntu)
-
-Build System: Makefile
-
-📂 Project Structure
-text
-├── server_2800.c          # Main server source code (C)
-├── client_2800.py         # Client CLI interface (Python)
-├── Makefile_2800          # Build automation script
-├── server_IT24102800.log  # Generated audit log file
-└── README.md              # Project documentation
-🚀 Getting Started
-Prerequisites
-Linux OS (Tested on Kali Linux)
-
-gcc compiler
-
-python3
-
-1. Build and Run the Server
-The Makefile automates the compilation and execution. You need sudo privileges to bind to the specific port and write to the /srv/ directory.
-
-bash
-# Compile and run the server
+### 1. Build the Server
+Use the provided Makefile to compile the server:
+```bash
 make -f Makefile_2800
-The server will start listening on port 50800.
+```
 
-2. Run the Client
+### 2. Run the Server
+Execute the server with `sudo` to ensure it can create the required data directories under `/srv/IE2102/IT24102800/`:
+```bash
+sudo ./server_2800
+```
+*Expected Output:* `Server running on port 50800, SID:4102`
+
+### 3. Run the Client
 Open a new terminal window and run the Python client:
-
-bash
+```bash
 python3 client_2800.py
-💻 Usage & Commands
-Once the client is connected, you can use the following commands:
+```
 
-Command	Description	Example
-REGISTER <user> <pass>	Creates a new user account.	REGISTER john 123
-LOGIN <user> <pass>	Authenticates and returns a session token.	LOGIN john 123
-WHOAMI	Returns the current logged-in username.	WHOAMI
-LOGOUT	Invalidates the current session token.	LOGOUT
-QUIT	Closes the client connection.	QUIT
-📸 Proof of Implementation
-(Include the screenshots from your report here on GitHub to show evidence of your work)
+---
 
-Network Configuration: Proof of IP address and port binding.
+## 💻 Client Commands
 
-Multiple Forked Processes: ps aux showing the parent and child processes.
+Once connected, the client supports the following commands:
 
-Security Lockout: Demonstration of the 60-second lockout after 3 failed attempts.
+| Command | Description |
+| :--- | :--- |
+| `REGISTER <user> <pass>` | Creates a new user account. |
+| `LOGIN <user> <pass>` | Authenticates the user and returns a Session Token. |
+| `LOGOUT` | Invalidates the current session token. |
+| `WHOAMI` | Returns the current logged-in username (requires token). |
+| `QUIT` | Closes the client connection gracefully. |
 
-Audit Logs: Screenshot of the server_IT24102800.log file.
+*Note: The client automatically stores the session token after a successful login and includes it in subsequent protected commands.*
 
-No Zombies: Proof of clean process termination.
+---
+
+## 🛡️ Security Test Cases (Proof of Concept)
+
+1. **Brute Force Protection:** Attempting to login 3 times with the wrong password will lock the account for 60 seconds.
+2. **Payload Overflow:** Sending a payload larger than 4096 bytes will be rejected by the server.
+3. **Zombie Process Check:** Running `ps aux | grep defunct` after multiple connections will show zero zombie processes due to `waitpid()` implementation.
+
+---
+
+## 📸 Screenshots & Evidence
+*(You can add your screenshots here, or link them if they are in an `/images` folder in your repo)*
+
+1. **Hostname Configuration** - `hostnamectl`
+2. **Network Configuration** - `ip addr`
+3. **Server Running** - `make -f Makefile_2800` & `sudo ./server_2800`
+4. **Successful REGISTER & LOGIN** - Client terminal output
+5. **Failed Login & Lockout** - Client terminal output showing `ERR 403 Account locked`
+6. **Multiple Forked Processes** - `ps aux | grep server_2800`
+7. **Log File Entries** - `cat server_IT24102800.log`
+8. **Proper Child Cleanup** - `ps aux | grep defunct` (No zombies found)
+
+---
+
+## ⚠️ Disclaimer
+This project was developed for educational purposes as part of the IE2102 module at SLIIT. The code is not intended for production use without further security auditing.
+
+---
+**Author:** RAJAPAKSHA K.R.D.A.P.M. (IT24102800)  
+**Module:** IE2102 - Network Programming  
+**Institution:** Sri Lanka Institute of Information Technology (SLIIT)
+```
+
+### Tips for GitHub:
+1. **Screenshots:** If you want the screenshots to show up in the README, create a folder called `images` in your repository, upload your screenshots there, and then replace the text in the "Screenshots & Evidence" section with actual image links (e.g., `![Server Running](images/server_running.png)`).
+2. **Badges:** The badges at the top are standard shield.io badges. They make the repo look professional.
+3. **.gitignore:** Don't forget to add a `.gitignore` file to your repo to ignore compiled binaries (like `server_2800`) and log files (like `server_IT24102800.log`) so they don't clutter your repository.
