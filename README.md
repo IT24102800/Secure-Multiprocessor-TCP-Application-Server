@@ -129,8 +129,7 @@ This project was developed for educational purposes as part of the IE2102 module
 
 ---
 **Author:** RAJAPAKSHA K.R.D.A.P.M. (IT24102800)  
-**Module:** IE2102 - Network Programming  
-**Institution:** Sri Lanka Institute of Information Technology (SLIIT)
+**Module:** Network Programming  
 ```
 
 ### Tips for GitHub:
